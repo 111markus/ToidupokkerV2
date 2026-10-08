@@ -1,4 +1,5 @@
 import { GROUPS, MAIN, createGame, chooseCard, drinkWater, continueGame, nextDay } from './engine.js';
+import { selectCatReaction, renderCatMascot } from './cat-mascot.js';
 
 const app = document.querySelector('#app');
 let game = null;
@@ -6,6 +7,8 @@ let view = 'home';
 let lastFocus = null;
 let recentFeedback = null;
 let feedbackTimer = null;
+let catReaction = null;
+let animateCat = false;
 const meals = ['Hommikusöök', 'Lõunasöök', 'Vahepala', 'Õhtusöök'];
 const situations = [
   ['Uus nädal, uus algus.', 'Pane alus mitmekesisele nädalale.'],
@@ -75,17 +78,18 @@ function feedback() {
 }
 function play() {
   const tutorial = game.mode === 'tutorial';
-  return `${header()}<main class="play-page"><div class="play-heading"><div><span class="eyebrow">${tutorial ? 'ÕPIME TASAKAALU' : `PÄEV ${game.day} / 7`}</span><h1>${tutorial ? 'Iga kaart loeb.' : situations[game.day - 1][0]}</h1><p>${tutorial ? 'Täida püramiid, üks valik korraga.' : situations[game.day - 1][1]}</p></div>${lives()}</div><div class="game-layout"><section class="play-table" aria-label="Mängulaud"><div class="round-bar"><span>${tutorial ? `VOOR ${Math.min(game.feedback ? game.round : game.round + 1, 9)} / 9` : `${meals[Math.min(game.feedback ? game.meal - 1 : game.meal, 3)].toUpperCase()}`}</span><div class="round-dots" aria-hidden="true">${Array.from({ length: tutorial ? 9 : 4 }, (_, i) => `<span class="${i < (tutorial ? game.round : game.meal) ? 'done' : i === (tutorial ? game.round : game.meal) ? 'current' : ''}"></span>`).join('')}</div><span>${tutorial ? 'ÕPETUS' : `${Math.min(game.feedback ? game.meal : game.meal + 1, 4)} / 4`}</span></div><div class="pyramid-wrap">${pyramid()}<span class="pyramid-side-note">Vähem üleval.<br/>Rohkem all.</span></div><div class="hand">${game.hand.map(foodCard).join('')}</div>${feedback()}<div class="table-bottom"><div class="deck-label"><span class="mini-deck" aria-hidden="true">✳</span><div><strong>${tutorial ? game.deck.length : game.deck.length + game.dayDeck.length} kaarti</strong><span>pakis alles</span></div></div><button class="water-button" data-action="water" ${game.lives === 3 || game.feedback ? 'disabled' : ''}>${drop()}<span><strong>${game.lives === 3 ? 'Vett on piisavalt' : 'Lonks vett'}</strong><small>${game.lives === 3 ? 'Sul on kõik kolm elu' : '+1 elu · see voor jääb vahele'}</small></span><span aria-hidden="true">+</span></button><span class="discard-info">${game.round * 3} kaarti<br/>maha läinud</span></div></section></div><div class="game-note"><span aria-hidden="true">✳</span>${tutorial ? 'Vihje: vajad 2 teravilja, 2 köögi- ja puuvilja ning 1 piima-, rasva- ja valgupunkti.' : 'Kahepunktiline kaart võib täiendada kahte gruppi. Mõlemad punktid lähevad arvesse.'}</div></main>${footer()}`;
+  return `${header()}<main class="play-page"><div class="play-heading"><div><span class="eyebrow">${tutorial ? 'ÕPIME TASAKAALU' : `PÄEV ${game.day} / 7`}</span><h1>${tutorial ? 'Iga kaart loeb.' : situations[game.day - 1][0]}</h1><p>${tutorial ? 'Täida püramiid, üks valik korraga.' : situations[game.day - 1][1]}</p></div>${lives()}</div><div class="game-layout"><section class="play-table" aria-label="Mängulaud"><div class="round-bar"><span>${tutorial ? `VOOR ${Math.min(game.feedback ? game.round : game.round + 1, 9)} / 9` : `${meals[Math.min(game.feedback ? game.meal - 1 : game.meal, 3)].toUpperCase()}`}</span><div class="round-dots" aria-hidden="true">${Array.from({ length: tutorial ? 9 : 4 }, (_, i) => `<span class="${i < (tutorial ? game.round : game.meal) ? 'done' : i === (tutorial ? game.round : game.meal) ? 'current' : ''}"></span>`).join('')}</div><span>${tutorial ? 'ÕPETUS' : `${Math.min(game.feedback ? game.meal : game.meal + 1, 4)} / 4`}</span></div><div class="pyramid-wrap">${pyramid()}<span class="pyramid-side-note">Vähem üleval.<br/>Rohkem all.</span></div>${renderCatMascot(catReaction, animateCat)}<div class="hand">${game.hand.map(foodCard).join('')}</div>${feedback()}<div class="table-bottom"><div class="deck-label"><span class="mini-deck" aria-hidden="true">✳</span><div><strong>${tutorial ? game.deck.length : game.deck.length + game.dayDeck.length} kaarti</strong><span>pakis alles</span></div></div><button class="water-button" data-action="water" ${game.lives === 3 || game.feedback ? 'disabled' : ''}>${drop()}<span><strong>${game.lives === 3 ? 'Vett on piisavalt' : 'Lonks vett'}</strong><small>${game.lives === 3 ? 'Sul on kõik kolm elu' : '+1 elu · see voor jääb vahele'}</small></span><span aria-hidden="true">+</span></button><span class="discard-info">${game.round * 3} kaarti<br/>maha läinud</span></div></section></div><div class="game-note"><span aria-hidden="true">✳</span>${tutorial ? 'Vihje: vajad 2 teravilja, 2 köögi- ja puuvilja ning 1 piima-, rasva- ja valgupunkti.' : 'Kahepunktiline kaart võib täiendada kahte gruppi. Mõlemad punktid lähevad arvesse.'}</div></main>${footer()}`;
 }
 function summary(day = false) {
   const title = day ? `${game.day}. päev tehtud!` : game.won ? 'Said tehtud!' : game.reason === 'water' ? 'Vesi sai otsa.' : game.reason === 'cards' ? 'Kaardid said otsa.' : 'Tasakaal vajab veel harjutamist.';
   const description = day ? 'Vaata oma nädala senist tasakaalu. Homme saad teha neli uut valikut.' : game.won ? game.mode === 'tutorial' ? 'Põhigrupid on täidetud. Oled valmis päriseluks!' : 'Kõik viis põhigruppi on soovitud vahemikus. Mõtlesid terve nädala peale!' : 'Üks mäng ei pea ideaalselt välja tulema. Vaata, mida järgmine kord teisiti valida.';
   const missing = MAIN.filter(k => game.counts[k] < GROUPS[k][game.mode][0]);
   const over = Object.keys(GROUPS).filter(k => game.counts[k] > GROUPS[k][game.mode][1]);
-  return `${header()}<main class="summary-page"><div class="summary-heading"><span class="eyebrow">${day ? 'PÄEVA KOKKUVÕTE' : game.mode === 'tutorial' ? 'ÕPETUSE TULEMUS' : 'NÄDALA TULEMUS'}</span><h1>${title}</h1><p>${description}</p></div>${recentFeedback ? feedback() : ""}<div class="summary-grid ${day ? "summary-grid-day" : ""}"><div class="summary-pyramid">${pyramid()}${lives()}<div class="summary-stats"><div><strong>${game.history.filter(h => !h.water).length}</strong><span>valitud kaarti</span></div><div><strong>${MAIN.reduce((sum, k) => sum + game.counts[k], 0)}</strong><span>põhigrupi punkti</span></div><div><strong>${game.counts.snack}</strong><span>snäkipunkti</span></div></div></div>${day ? "" : balance()}</div>${missing.length || over.length ? `<div class="result-advice">${missing.length ? `<p><strong>Lisa veel:</strong> ${missing.map(k => `${GROUPS[k].short.toLowerCase()} (${GROUPS[k][game.mode][0] - game.counts[k]} p)`).join(', ')}.</p>` : ''}${over.length ? `<p><strong>Piir on ületatud:</strong> ${over.map(k => GROUPS[k].short.toLowerCase()).join(', ')}.</p>` : ''}${!day ? '<p>Tasakaal sõltub tervikust. Proovi järgmises mängus täita esmalt puuduvad grupid.</p>' : ''}</div>` : ''}<section class="history-section"><h2>${day ? 'Tänased valikud' : 'Sinu valitud kaardid'}</h2><div class="history-cards">${game.history.filter(h => !day || h.day === game.day).map(h => `<div class="history-card" style="--group-color:${h.water ? '#a5c1d0' : GROUPS[h.groups[0]].color}"><span aria-hidden="true">${h.water ? '💧' : h.icon}</span><strong>${h.water ? 'Lonks vett' : escape(h.name)}</strong><small>${h.water ? 'Söögikord jäi vahele' : h.groups.map(k => GROUPS[k].short).join(' + ')}</small></div>`).join('')}</div></section><div class="summary-actions">${day ? `<button class="button primary" data-action="next-day">Alusta ${game.day + 1}. päeva</button>` : `<button class="button outline" data-action="restart">Proovi uuesti</button>${game.mode === 'tutorial' ? '<button class="button primary" data-action="start-real">Astu pärisellu</button>' : '<button class="button primary" data-action="home">Tagasi algusesse</button>'}`}</div><p class="summary-learning">Mängu veed on elud ja punktid on õppimise tööriist. Päriselus on oluline mitmekesisus ja kogu toidulaud.</p></main>${footer()}`;
+  return `${header()}<main class="summary-page"><div class="summary-heading"><span class="eyebrow">${day ? 'PÄEVA KOKKUVÕTE' : game.mode === 'tutorial' ? 'ÕPETUSE TULEMUS' : 'NÄDALA TULEMUS'}</span><h1>${title}</h1><p>${description}</p></div>${recentFeedback ? feedback() : ""}<div class="summary-grid ${day ? "summary-grid-day" : ""}"><div class="summary-pyramid">${pyramid()}${renderCatMascot(catReaction, animateCat)}${lives()}<div class="summary-stats"><div><strong>${game.history.filter(h => !h.water).length}</strong><span>valitud kaarti</span></div><div><strong>${MAIN.reduce((sum, k) => sum + game.counts[k], 0)}</strong><span>põhigrupi punkti</span></div><div><strong>${game.counts.snack}</strong><span>snäkipunkti</span></div></div></div>${day ? "" : balance()}</div>${missing.length || over.length ? `<div class="result-advice">${missing.length ? `<p><strong>Lisa veel:</strong> ${missing.map(k => `${GROUPS[k].short.toLowerCase()} (${GROUPS[k][game.mode][0] - game.counts[k]} p)`).join(', ')}.</p>` : ''}${over.length ? `<p><strong>Piir on ületatud:</strong> ${over.map(k => GROUPS[k].short.toLowerCase()).join(', ')}.</p>` : ''}${!day ? '<p>Tasakaal sõltub tervikust. Proovi järgmises mängus täita esmalt puuduvad grupid.</p>' : ''}</div>` : ''}<section class="history-section"><h2>${day ? 'Tänased valikud' : 'Sinu valitud kaardid'}</h2><div class="history-cards">${game.history.filter(h => !day || h.day === game.day).map(h => `<div class="history-card" style="--group-color:${h.water ? '#a5c1d0' : GROUPS[h.groups[0]].color}"><span aria-hidden="true">${h.water ? '💧' : h.icon}</span><strong>${h.water ? 'Lonks vett' : escape(h.name)}</strong><small>${h.water ? 'Söögikord jäi vahele' : h.groups.map(k => GROUPS[k].short).join(' + ')}</small></div>`).join('')}</div></section><div class="summary-actions">${day ? `<button class="button primary" data-action="next-day">Alusta ${game.day + 1}. päeva</button>` : `<button class="button outline" data-action="restart">Proovi uuesti</button>${game.mode === 'tutorial' ? '<button class="button primary" data-action="start-real">Astu pärisellu</button>' : '<button class="button primary" data-action="home">Tagasi algusesse</button>'}`}</div><p class="summary-learning">Mängu veed on elud ja punktid on õppimise tööriist. Päriselus on oluline mitmekesisus ja kogu toidulaud.</p></main>${footer()}`;
 }
 function render(focus = false) {
   app.innerHTML = view === 'home' ? home() : view === 'play' ? play() : summary(view === 'day-summary');
+  animateCat = false;
   if (focus) {
     const target = view === 'play' ? app.querySelector('.food-card') : app.querySelector('h1');
     if (target) { if (target.tagName !== 'BUTTON') target.tabIndex = -1; target.focus({ preventScroll: true }); }
@@ -96,10 +100,13 @@ function clearFeedback() {
   feedbackTimer = null;
   recentFeedback = null;
 }
-function start(mode) { clearFeedback(); game = createGame(mode); view = 'play'; render(true); window.scrollTo({ top: 0 }); }
+function resetCat() { catReaction = null; animateCat = false; }
+function start(mode) { clearFeedback(); resetCat(); game = createGame(mode); view = 'play'; render(true); window.scrollTo({ top: 0 }); }
 function advanceAfterTurn() {
   clearFeedback();
   recentFeedback = game.feedback;
+  catReaction = selectCatReaction(recentFeedback, catReaction?.line);
+  animateCat = true;
   if (game.status === 'playing') {
     continueGame(game);
     feedbackTimer = setTimeout(() => {
@@ -151,8 +158,8 @@ document.addEventListener('click', event => {
     case 'close-help': closeDialog('#help'); break;
     case 'exit': showExit(); break;
     case 'close-exit': closeDialog('#exit'); break;
-    case 'confirm-exit': closeDialog('#exit'); clearFeedback(); game = null; view = 'home'; render(true); break;
-    case 'home': if (view === 'play') showExit(); else { clearFeedback(); game = null; view = 'home'; render(true); } break;
+    case 'confirm-exit': closeDialog('#exit'); clearFeedback(); resetCat(); game = null; view = 'home'; render(true); break;
+    case 'home': if (view === 'play') showExit(); else { clearFeedback(); resetCat(); game = null; view = 'home'; render(true); } break;
   }
 });
 for (const dialog of document.querySelectorAll('dialog')) {

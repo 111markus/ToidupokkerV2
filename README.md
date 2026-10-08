@@ -47,6 +47,15 @@ Commit and push the deployment changes to GitHub before redeploying in Render.
 
 References: [Render static sites](https://render.com/docs/static-sites), [monorepo root directories](https://render.com/docs/monorepo-support), and [web service port binding](https://render.com/docs/web-services#port-binding).
 
+## Cat mascot
+
+- Edit all Estonian dialogue in `game/dist/cat-lines.js`.
+- Replace the inline SVG in `catArtwork()` in `game/dist/cat-mascot.js` to swap the character. Expression selection reads existing move feedback and never changes the game engine.
+- The bubble persists until the next move, including the last move on day/final summaries. Starting or restarting either phase clears it; moving to the next day keeps the last line.
+- Priority: category overflow, snack, two-point card, category pick; water has its own pool. Repeat snacks use their penalty lines with a cheeky expression; snack overflow uses an angry expression. Optional food-specific lines appear occasionally only without life loss.
+- Lines are not repeated consecutively when the matching pool contains an alternative. Exact single-line penalties can repeat when that penalty happens on consecutive moves.
+- Short-phone layouts compact the play area and use the cat as the visible move feedback. Reduced motion disables cat/bubble animation. The bubble follows the system color scheme or a parent `data-theme="light"` / `data-theme="dark"`.
+
 ## Reeglite täpsustused
 
 - Õpetus: 27 erinevat ühepunktilist kaarti. Kuna algtekst ei määratle õpetuse täpset 27-kaardilist nimekirja, valitakse igaks mänguks 6 teravilja-, 7 köögivilja-, 4 piima-, 3 rasva-, 5 valgu- ja 2 snäkikaarti ühepunktiliste toitude nimekirjast. Eesmärgid 2/2/1/1/1, kuni 9 vooru. Õpetuses peatub põhigrupi punktisumma sihtkoguse juures; üleliigne valik kulutab vett.

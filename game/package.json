@@ -8,6 +8,6 @@
     "build": "npm run check",
     "start": "node server.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check dist/engine.js && node --check dist/app.js"
+    "check": "node --check dist/engine.js && node --check dist/app.js && node --check dist/cat-lines.js && node --check dist/cat-mascot.js"
   }
 }

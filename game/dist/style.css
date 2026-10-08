@@ -69,26 +69,12 @@
   .cat-mascot .cat-art,.cat-mascot .cat-eyes,.cat-mascot .cat-bubble{animation:none!important;transition:none!important}
 }
 
-/* Move points sit below the speech bubble, within its reserved row. */
-.turn-reaction{position:relative;margin-bottom:8px}
-.turn-reaction .cat-mascot{align-items:flex-start;height:104px}
-.turn-reaction .cat-art{align-self:center}
-.turn-reaction .cat-bubble{margin-top:0}
-.move-points{position:absolute;left:104px;right:0;bottom:2px;height:34px;display:flex;gap:7px}
-.move-point{--point-color:#d9d3c2;display:flex;flex:1;min-width:0;align-items:center;gap:8px;padding:3px 10px;border:1.5px solid var(--ink);border-radius:10px;background:color-mix(in srgb,var(--point-color) 55%,var(--cream));color:var(--ink);box-shadow:2px 2px 0 #3b352f14}
-.move-point strong{font-size:26px;line-height:1;font-weight:800;flex-shrink:0}
-.move-point>span{font-size:13px;line-height:1.1;font-weight:700;overflow-wrap:anywhere}
-.move-point-water{--point-color:#a5c1d0}
-.move-point-loss{--point-color:#e6ad9c;border-color:#964329;color:#80351e}
-.move-point-zero{--point-color:#e4dbca}
-.summary-pyramid .turn-reaction{margin:8px 0}
-.summary-pyramid .turn-reaction .cat-mascot{margin:0}
+/* Keep the card's point value prominent before a player chooses it. */
+.card-top{gap:4px}
+.card-point{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1.5px solid var(--ink);border-radius:7px;background:color-mix(in srgb,var(--card-color) 40%,var(--cream));color:var(--ink);font-size:11px;font-weight:800;line-height:1;letter-spacing:.3px;white-space:nowrap}
+.card-point strong{font-size:23px;line-height:1;font-weight:800}
+.card-corner{flex-shrink:0}
 @media(max-width:750px){
-  .turn-reaction .cat-mascot{height:98px}
-  .move-points{left:92px;gap:5px;height:32px;bottom:1px}
-  .move-point{gap:5px;padding:3px 7px;border-radius:8px}
-  .move-point strong{font-size:23px}
-  .move-point>span{font-size:12px}
-  .move-points:has(.move-point:nth-child(2)) .move-point>span{font-size:11px}
-  .summary-pyramid .turn-reaction{margin:8px -20px}
+  .play-page .card-point{gap:3px;padding:4px;font-size:9px;letter-spacing:0}
+  .card-point strong{font-size:20px}
 }

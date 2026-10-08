@@ -6,6 +6,7 @@ let view = 'home';
 let lastFocus = null;
 let recentFeedback = null;
 let feedbackTimer = null;
+let guidedTutorial = false;
 const meals = ['Hommikusöök', 'Lõunasöök', 'Vahepala', 'Õhtusöök'];
 const situations = [
   ['Uus nädal, uus algus.', 'Pane alus mitmekesisele nädalale.'],
@@ -59,7 +60,7 @@ function balance() {
 }
 function lives() { return `<div class="lives" aria-label="${game.lives} vett kolmest">${[0, 1, 2].map(i => drop(i >= game.lives)).join('')}<span>${game.lives}/3 vett</span></div>`; }
 function foodCard(card, index) {
-  return `<button class="food-card" data-action="choose" data-id="${escape(card.id)}" style="--card-color:${GROUPS[card.groups[0]].color};--card-index:${index}" aria-label="Vali ${escape(card.name)}"><div class="card-top"><span class="card-point">${card.groups.length === 2 ? '2 PUNKTI' : card.groups[0] === 'snack' ? 'SNÄKK' : '1 PUNKT'}</span><span class="card-corner" aria-hidden="true">✳</span></div><span class="food-illustration" aria-hidden="true">${card.icon}</span><strong class="food-name">${escape(card.name)}</strong><span class="card-select">Vali kaart</span></button>`;
+  return `<button class="food-card" data-action="choose" data-id="${escape(card.id)}" style="--card-color:${GROUPS[card.groups[0]].color};--card-index:${index}" aria-label="Vali ${escape(card.name)}"><div class="card-top"><span class="card-point">${card.groups.length === 2 ? '2 PUNKTI' : card.groups[0] === 'snack' ? 'SNÄKK' : '1 PUNKT'}</span><span class="card-corner" aria-hidden="true">✳</span></div><span class="card-groups">${card.groups.map(k => escape(GROUPS[k].short)).join(' + ')}</span><span class="food-illustration" aria-hidden="true">${card.icon}</span><strong class="food-name">${escape(card.name)}</strong><span class="card-select">Vali kaart</span></button>`;
 }
 function feedback() {
   const f = recentFeedback;
@@ -86,6 +87,12 @@ function summary(day = false) {
 }
 function render(focus = false) {
   app.innerHTML = view === 'home' ? home() : view === 'play' ? play() : summary(view === 'day-summary');
+  if (view === 'home') {
+    app.querySelector('[data-action="start-tutorial"]')?.insertAdjacentHTML('afterend', '<button class="button guided-button" data-action="start-guided">Mängi juhendiga</button>');
+  }
+  if (view === 'play' && guidedTutorial && game.mode === 'tutorial') {
+    app.querySelector('.game-layout')?.insertAdjacentHTML('beforebegin', '<aside class="tutorial-guide" aria-label="Õpetuse juhend"><h2>Mänguplaan</h2><div class="tutorial-guide-items"><p><strong>Kuidas mängida</strong> Vali kolmest kaardist üks. Ülejäänud kaks lähevad maha.</p><p><strong>Kaardid</strong> Õpetuses annab kaart 1 punkti ühele grupile. Päriselu mängus leidub kaarte, mis annavad 1 punkti kahele grupile.</p><p><strong>Võit</strong> Kogu 2 teravilja, 2 köögi- ja puuvilja ning 1 piima-, rasva- ja valgupunkt. Snäkke pole vaja.</p><p><strong>Voorud ja elud</strong> Sul on kuni 9 vooru ja 3 vett ehk elu. Tasakaalu täitumisel võidad kohe.</p></div></aside>');
+  }
   if (focus) {
     const target = view === 'play' ? app.querySelector('.food-card') : app.querySelector('h1');
     if (target) { if (target.tagName !== 'BUTTON') target.tabIndex = -1; target.focus({ preventScroll: true }); }
@@ -96,7 +103,7 @@ function clearFeedback() {
   feedbackTimer = null;
   recentFeedback = null;
 }
-function start(mode) { clearFeedback(); game = createGame(mode); view = 'play'; render(true); window.scrollTo({ top: 0 }); }
+function start(mode, guided = false) { clearFeedback(); guidedTutorial = mode === 'tutorial' && guided; game = createGame(mode); view = 'play'; render(true); window.scrollTo({ top: 0 }); }
 function advanceAfterTurn() {
   clearFeedback();
   recentFeedback = game.feedback;
@@ -142,11 +149,12 @@ document.addEventListener('click', event => {
   if (!button || button.disabled) return;
   switch (button.dataset.action) {
     case 'start-tutorial': start('tutorial'); break;
+    case 'start-guided': start('tutorial', true); break;
     case 'start-real': start('real'); break;
     case 'choose': playCard(button.dataset.id); break;
     case 'water': takeWater(); break;
     case 'next-day': advanceDay(); break;
-    case 'restart': start(game.mode); break;
+    case 'restart': start(game.mode, guidedTutorial); break;
     case 'help': showHelp(); break;
     case 'close-help': closeDialog('#help'); break;
     case 'exit': showExit(); break;

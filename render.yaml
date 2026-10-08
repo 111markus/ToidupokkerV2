@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: toidupokker
+    runtime: static
+    rootDir: game
+    buildCommand: npm run build
+    staticPublishPath: dist

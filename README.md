@@ -7,17 +7,45 @@ Eestikeelne, mobiilisõbralik toitumispüramiidi kaardimäng 16–19-aastastele.
 Vaja on Node.js 20 või uuemat. Sõltuvusi pole vaja paigaldada.
 
 ```sh
-cd game
 npm run dev
 ```
 
 Ava http://127.0.0.1:5173. Veebirakenduse avaldatavad failid asuvad `game/dist/`. Mängu olek on brauseri mälus; lehe värskendamine alustab uuesti.
 
 ```sh
-cd game
 npm test
 npm run check
 ```
+
+Käsud töötavad nii repositooriumi juurkaustas kui ka `game/` kaustas.
+
+## Render deployment
+
+The app is a static site: `game/dist/` already contains the deployable HTML, CSS, JavaScript, and image. `npm run build` checks JavaScript syntax; it does not need a bundling step.
+
+For a **Static Site** in Render, connect this repository with these settings:
+
+| Setting | Value |
+| --- | --- |
+| Root Directory | `game` |
+| Build Command | `npm run build` |
+| Publish Directory | `dist` |
+
+Alternatively, create a Render Blueprint from the repository-root `render.yaml`, which defines these static-site settings. Adding `render.yaml` does not automatically change an existing service created manually.
+
+For an existing Node **Web Service**, these settings also work:
+
+| Setting | Value |
+| --- | --- |
+| Root Directory | Leave empty (repository root) |
+| Build Command | `npm install && npm run build` |
+| Start Command | `npm start` |
+
+The root `package.json` forwards these commands to `game/`. The server binds to `0.0.0.0` on Render's `PORT`. Local development defaults to `127.0.0.1:5173`; `HOST` and `PORT` can override those values.
+
+Commit and push the deployment changes to GitHub before redeploying in Render.
+
+References: [Render static sites](https://render.com/docs/static-sites), [monorepo root directories](https://render.com/docs/monorepo-support), and [web service port binding](https://render.com/docs/web-services#port-binding).
 
 ## Reeglite täpsustused
 

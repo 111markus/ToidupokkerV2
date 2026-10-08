@@ -1,0 +1,16 @@
+{
+  "name": "toidupokker-project",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "npm --prefix game run dev",
+    "build": "npm --prefix game run build",
+    "start": "npm --prefix game start",
+    "test": "npm --prefix game test",
+    "check": "npm --prefix game run check"
+  }
+}

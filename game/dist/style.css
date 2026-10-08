@@ -11,6 +11,12 @@
 
 .play-page{max-width:788px}.game-layout,.summary-grid-day{grid-template-columns:minmax(0,1fr)}
 
+/* Hand cards share a neutral color; category colors appear in the pyramid. */
+.food-card{--card-color:#cdd6bb}
+.round-status{position:relative;text-align:right}
+.round-status .lives{position:absolute;top:calc(100% + 8px);right:0;gap:5px;flex-wrap:nowrap}
+.round-status .lives>span{display:none}
+
 /* Reserve the same space before and after the first mascot reaction. */
 .cat-mascot{--cat-bubble-bg:var(--paper);--cat-bubble-ink:var(--ink);--cat-bubble-border:var(--border);display:flex;align-items:center;gap:12px;height:100px;min-width:0;isolation:isolate}
 .cat-hidden{visibility:hidden;pointer-events:none}
